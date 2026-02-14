@@ -1,0 +1,7 @@
+{
+  "coordinator_url": "http://127.0.0.1:9100",
+  "database": "fxbot_members.db",
+  "crypto_wallet": "YOUR_CRYPTO_WALLET_ADDRESS",
+  "paypal_link": "https://paypal.me/YOURNAME",
+  "gcash_number": "+63XXXXXXXXXX"
+}
