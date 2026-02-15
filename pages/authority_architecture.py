@@ -85,6 +85,6 @@ st.header("Authority Documentation")
 
 st.download_button(
     label="Download Architecture Whitepaper",
-    data=open("FXBot_Elite_Authority_Architecture_Whitepaper.pdf","rb").read(),
-    file_name="FXBot_Elite_Architecture.pdf"
+    data=open("assets/FXBot_Elite_Authority_Architecture_Whitepaper.pdf","rb").read(),
+    file_name="FXBot_Elite_Architecture_Whitepaper.pdf"
 )
