@@ -1,0 +1,11 @@
+{
+  "members": [
+    {
+      "member_id": "elite001",
+      "email": "demo@example.com",
+      "tier": "elite",
+      "allowed_roles": ["lite_node","viewer"],
+      "active": true
+    }
+  ]
+}
