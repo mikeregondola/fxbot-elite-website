@@ -1,3 +1,6 @@
+if "member" not in st.session_state:
+    st.session_state.member = None
+
 import streamlit as st
 import json
 
