@@ -1,14 +1,39 @@
 import streamlit as st
 
-st.title("Membership Tiers")
+st.set_page_config(layout="wide")
 
-st.markdown("""
-### Tier 1 — Observer
-Education + signals
+st.title("💼 Elite Membership Structure")
 
-### Tier 2 — Operator
-Runs trading node
+tiers = [
+    ("🟢 Tier 1 — Observer",
+     ["Education library",
+      "W3 strategy training",
+      "Weekly commentary",
+      "Delayed signals"]),
+      
+    ("🔵 Tier 2 — Active Trader",
+     ["Live W3 signals",
+      "Risk automation tools",
+      "Elite dashboard",
+      "Personal execution control"]),
+      
+    ("🔴 Tier 3 — Node Operator",
+     ["Run Lite node",
+      "Auto execution",
+      "Cluster participation",
+      "Priority signals"]),
+      
+    ("🟣 Tier 4 — Elite Authority",
+     ["Institutional analytics",
+      "DAO governance",
+      "Cloud cluster access",
+      "Advanced strategy beta"])
+]
 
-### Tier 3 — Network Node
-Earn from distributed infrastructure
-""")
+cols = st.columns(4)
+
+for col, tier in zip(cols, tiers):
+    with col:
+        st.subheader(tier[0])
+        for item in tier[1]:
+            st.write("✔", item)
