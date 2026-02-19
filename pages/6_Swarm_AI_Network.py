@@ -1,86 +1,108 @@
 import streamlit as st
 import requests
 import plotly.graph_objects as go
-import networkx as nx
 import random
 
-st.title("🧠 ULTRA SWARM AI NETWORK")
+st.title("🌐 Swarm AI Network")
 
-COORD = "http://127.0.0.1:9100/api/nodes"
+# -----------------------------
+# CONFIG
+# -----------------------------
 
-data = requests.get(COORD).json()
-nodes = data["nodes"]
+def get_coord_url():
 
-G = nx.Graph()
-G.add_node("BRAIN")
+    # Cloud deployment
+    if "COORDINATOR_URL" in st.secrets:
+        return st.secrets["COORDINATOR_URL"]
+
+    # Local fallback
+    return "http://127.0.0.1:9100"
+
+
+COORD = get_coord_url()
+
+# -----------------------------
+# FETCH DATA
+# -----------------------------
+
+def load_nodes():
+
+    try:
+        r = requests.get(f"{COORD}/api/nodes", timeout=3)
+        return r.json()
+
+    except:
+        st.warning("Coordinator offline — Demo mode enabled")
+
+        # demo fallback
+        return {
+            "nodes":[
+                {"node_id":"mini-pc-1","member_id":"member_A","capital":5000},
+                {"node_id":"mini-pc-2","member_id":"member_B","capital":3000},
+                {"node_id":"mini-pc-3","member_id":"member_A","capital":2500}
+            ]
+        }
+
+
+data = load_nodes()
+nodes = data.get("nodes", [])
+
+# -----------------------------
+# BUILD VISUAL GRAPH
+# -----------------------------
+
+if len(nodes) == 0:
+
+    st.info("No nodes registered.")
+    st.stop()
+
+fig = go.Figure()
+
+x_nodes = []
+y_nodes = []
+labels = []
+colors = []
+sizes = []
 
 for n in nodes:
-    G.add_node(n["node_id"])
-    G.add_edge("BRAIN", n["node_id"])
 
-pos = nx.spring_layout(G, seed=7)
+    x_nodes.append(random.random())
+    y_nodes.append(random.random())
 
-edge_x = []
-edge_y = []
+    member = n.get("member_id","unknown")
 
-for e in G.edges():
-    x0,y0 = pos[e[0]]
-    x1,y1 = pos[e[1]]
+    labels.append(
+        f"{n['node_id']}<br>Member:{member}<br>Capital:{n.get('capital',0)}"
+    )
 
-    edge_x += [x0,x1,None]
-    edge_y += [y0,y1,None]
+    colors.append(hash(member) % 10)
 
-edge_trace = go.Scatter(
-    x=edge_x,
-    y=edge_y,
-    mode='lines',
-    line=dict(width=3,color='cyan'),
-    opacity=0.4
-)
+    sizes.append(20 + n.get("capital",0)/200)
 
-node_x=[]
-node_y=[]
-colors=[]
-sizes=[]
-labels=[]
-
-for node in G.nodes():
-
-    x,y=pos[node]
-    node_x.append(x)
-    node_y.append(y)
-
-    if node=="BRAIN":
-        colors.append("cyan")
-        sizes.append(50)
-        labels.append("Coordinator Brain")
-    else:
-        info = next((n for n in nodes if n["node_id"]==node),None)
-        alive = info.get("alive",False)
-
-        colors.append("lime" if alive else "red")
-        sizes.append(30)
-
-        labels.append(node)
-
-node_trace = go.Scatter(
-    x=node_x,
-    y=node_y,
+fig.add_trace(go.Scatter(
+    x=x_nodes,
+    y=y_nodes,
     mode='markers+text',
-    text=labels,
-    textposition="bottom center",
+    text=[n["node_id"] for n in nodes],
+    hovertext=labels,
     marker=dict(
         size=sizes,
-        color=colors
+        color=colors,
+        showscale=False
     )
-)
-
-fig = go.Figure(data=[edge_trace,node_trace])
+))
 
 fig.update_layout(
     showlegend=False,
-    xaxis=dict(visible=False),
-    yaxis=dict(visible=False),
+    height=600
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+# -----------------------------
+# TABLE VIEW
+# -----------------------------
+
+st.subheader("Node Details")
+
+st.dataframe(nodes)
