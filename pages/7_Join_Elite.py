@@ -1,65 +1,44 @@
 import streamlit as st
-from member_engine import create_member
+import requests
+import uuid
+import json
 
 st.title("🚀 Join FXBot Elite Network")
 
-st.markdown("""
-Become part of the decentralized Wave 3 trading network.
+st.write("Register your account and join the autonomous trading cluster.")
 
-Select your participation tier below.
-""")
+# ---- Member Inputs ----
 
-# -----------------------------
-# Tier Selection
-# -----------------------------
+name = st.text_input("Your Name")
+email = st.text_input("Email")
 
 tier = st.selectbox(
-    "Select Membership Tier",
-    [
-        "Lite Node (Passive participant)",
-        "Trader Node (Active trading)",
-        "Elite Operator (Full control)"
-    ]
+    "Choose Tier",
+    ["Tier 1 - Observer", "Tier 2 - Trader", "Tier 3 - Node Provider"]
 )
 
-email = st.text_input("Email Address")
+if st.button("Join Elite"):
 
-device_name = st.text_input(
-    "Optional Device Name (Mini-PC name)",
-    placeholder="ex: mini-pc-1"
-)
+    member_id = str(uuid.uuid4())
 
-# -----------------------------
-# Join Button
-# -----------------------------
+    payload = {
+        "member_id": member_id,
+        "name": name,
+        "email": email,
+        "tier": tier
+    }
 
-if st.button("JOIN ELITE NETWORK"):
+    try:
+        requests.post(
+            "https://YOUR-COORDINATOR-URL/register_member",
+            json=payload,
+            timeout=3
+        )
 
-    if email.strip() == "":
-        st.error("Email required.")
-        st.stop()
+        st.success(f"Welcome! Your Member ID: {member_id}")
 
-    # Create member automatically
-    member = create_member(
-        email=email,
-        tier=tier,
-        device_name=device_name
-    )
+    except Exception:
+        st.warning("Coordinator offline. Saved locally.")
 
-    st.success("🎉 Membership Created!")
-
-    st.markdown("### Your Member Credentials")
-
-    st.code(f"""
-Member ID: {member['id']}
-Tier: {member['tier']}
-Status: {member['status']}
-""")
-
-    st.markdown("### Next Step")
-
-    st.info("""
-1️⃣ Copy your MEMBER ID.
-
-2️⃣ Place it inside your Mini-PC config:
-
+        with open("pending_members.json","a") as f:
+            f.write(json.dumps(payload) + "\n")
